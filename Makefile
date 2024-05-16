@@ -42,15 +42,7 @@ $(BUILD)/$(PROJ).bin : $(BUILD)/$(PROJ).asc
 
 #########################
 # Run a testbench
-source_sim: $(SRC)
-	# if build folder doesn't exist, create it
-	mkdir -p $(BUILD)
-	# run simulation
-	iverilog -g2012 $(SRC) $(TB) -o $(BUILD)/$(PROJ)
-	vvp $(BUILD)/$(PROJ)
-	gtkwave $(TRACE)
-
-mapped_sim: $(SRC)
+sim: $(SRC)
 	# if build folder doesn't exist, create it
 	mkdir -p $(BUILD)
 	# synthesize with yosys to cell-level Verilog
@@ -59,6 +51,24 @@ mapped_sim: $(SRC)
 	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v $(TB) -o $(BUILD)/$(PROJ)
 	vvp $(BUILD)/$(PROJ)
 	gtkwave $(TRACE)
+
+# source_sim: $(SRC)
+# 	# if build folder doesn't exist, create it
+# 	mkdir -p $(BUILD)
+# 	# run simulation
+# 	iverilog -g2012 $(SRC) $(TB) -o $(BUILD)/$(PROJ)
+# 	vvp $(BUILD)/$(PROJ)
+# 	gtkwave $(TRACE)
+
+# mapped_sim: $(SRC)
+# 	# if build folder doesn't exist, create it
+# 	mkdir -p $(BUILD)
+# 	# synthesize with yosys to cell-level Verilog
+# 	$(YOSYS) -p "read_verilog -sv -noblackbox $(SRC); synth_ice40; write_verilog $(BUILD)/$(PROJ).v"
+# 	# run simulation
+# 	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v $(TB) -o $(BUILD)/$(PROJ)
+# 	vvp $(BUILD)/$(PROJ)
+# 	gtkwave $(TRACE)
 
 #########################
 # ice40 Specific Targets
