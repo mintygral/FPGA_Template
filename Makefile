@@ -58,7 +58,7 @@ verify_%: $(SRC) tb_%.sv
 	# synthesize with yosys to cell-level Verilog
 	$(YOSYS) -p "read_verilog -sv -noblackbox $(SRC); synth_ice40 -top $*; write_verilog $(BUILD)/$(PROJ).v"
 	# run simulation
-	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v $(TB) -o $(BUILD)/$(PROJ)
+	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v tb_$*.sv -o $(BUILD)/$(PROJ)
 	vvp $(BUILD)/$(PROJ)
 
 # source_sim: $(SRC)
