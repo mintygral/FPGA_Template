@@ -15,9 +15,17 @@ module top (
   output logic txclk, rxclk,
   input  logic txready, rxready
 );
+  logic [3:0] S;
+  logic Cout;
+  logic [3:0] Cout3bit;
+  ssdec displayA(.in(pb[3:0]), .enable(1), .out(ss7[6:0]));
+  ssdec displayB(.in(pb[7:4]), .enable(1), .out(ss5[6:0]));
+  bcdadd addsum(.A(pb[3:0]), .B(pb[7:4]), .Cin(pb[8]), .S(S), .Cout(Cout));
+  ssdec displayS(.in(S), .enable(1), .out(ss0[6:0]));
 
-  ssdec instantiate(.in(pb[3:0]), .enable(pb[4]), .out(ss0[6:0]));
-  
+  assign Cout3bit = {3'd0, Cout};
+  ssdec displayCout(.in(Cout3bit), .enable(1), .out(ss1[6:0]));
+
 endmodule
 
 module ssdec(
@@ -52,4 +60,52 @@ always_comb begin
 end
 
 endmodule
+
+module fa(
+  input logic A, B, Cin,
+  output logic Cout, S
+);
+
+// Code here
+  assign Cout = (Cin && B) | (A && B) | (A && Cin); // Cout
+  assign S = ( ~(A | B) && Cin) | (~(A | Cin) && B) | (~(B | Cin) && A) | ((A && B) && Cin);
+
+endmodule
+
 // Add more modules down here...
+
+module fa4 (
+  input logic [3:0] A, B,
+  input logic Cin,
+  output logic [3:0] S,
+  output logic Cout
+);
+
+  logic Cout0, Cout1, Cout2;
+
+  fa a10(.A(A[0]),.B(B[0]),.Cin(Cin),.Cout(Cout0),.S(S[0]));
+  fa a11(.A(A[1]),.B(B[1]),.Cin(Cout0),.Cout(Cout1),.S(S[1]));
+  fa a12(.A(A[2]),.B(B[2]),.Cin(Cout1),.Cout(Cout2),.S(S[2]));
+  fa a13(.A(A[3]),.B(B[3]),.Cin(Cout2),.Cout(Cout),.S(S[3]));
+
+endmodule 
+
+module bcdadd (
+  input logic [3:0] A, B,
+  input logic Cin,
+  output logic [3:0] S,
+  output logic Cout );
+  logic carry;
+  fa4 adder(.A(A), .B(B), .S(tempsum), .Cin(Cin), .Cout(carry));
+  logic [3:0] tempsum, tempB; 
+  
+  always_comb begin
+    tempB = 4'b0;
+    if ((carry == 1) | (tempsum > 9)) begin
+    tempB = 4'b0110;
+    end
+  end
+  fa4 result(.A(tempsum), .B(tempB), .S(S), .Cin(1'b0), .Cout());
+  assign Cout = (tempsum > 9) | (carry == 1);
+
+endmodule
