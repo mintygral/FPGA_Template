@@ -1,29 +1,56 @@
 // testbench
 `timescale 1ms/10ps
 module tb;
-  logic [3:0] A, B;
-  logic Cin;
-  logic [3:0] S;
-  logic Cout;
+  logic [19:0] in;
+  logic [4:0] out;
+  logic strobe;
 
-  bcdadd addsum(.A(A), .B(B), .Cin(Cin), .S(S), .Cout(Cout));
+  enc20to5 encode(.in(in), .out(out), .strobe(strobe));
 
   initial begin
     $dumpfile("sim.vcd");
     $dumpvars(0, tb);
-
-    // for loop to test all possible inputs
-    for (integer i=0; i<=15; i++) begin
-      for (integer j=0; j<=9; j++) begin
-        for (integer k=0; k<=1; k++) begin
-          A = i; B = j; Cin = k;
-          #1;
-          $display("A=%b, B=%b, Cin=%b, Cout=%b, S=%b", A,B,Cin,Cout,S);
-        end
-      end
+    in = 20'b0;
+    #1;
+    for (integer i=0; i<=19; i++) begin
+     in[i] = 1;
+      #1;
+      $display("in=%b, out=%b, strobe=%b", in, out, strobe);  // checked!! this part works!
     end
 
-    #1 $finish;
+
+    // reset to 0
+    // custom cases 
+    
+    in = 20'b0;
+    // for (integer j=0; j<3; j++) begin
+    //   in = 20'b0;
+    //   integer rand1 = $random % 20;
+    //   integer rand2 = $random % 20;
+    //   in[rand1] = 1;
+    //   in[rand2] = 1;
+    //   $display("in=%b, out=%b, strobe=%b", in, out, strobe);
+    // end
+    
+    $display("in=%b, out=%b, strobe=%b", in, out, strobe);
+    in = 20'b01000000001000000000;
+    $display("in=%b, out=%b, strobe=%b", in, out, strobe);
+    #1;
+
+    in = 20'b00000000010000010000;
+    $display("in=%b, out=%b, strobe=%b", in, out, strobe);
+    #1;
+
+    in = 20'b00000000000000000011;
+    $display("in=%b, out=%b, strobe=%b", in, out, strobe);
+    #1;
+    
+    // // Output of custom cases
+    // // in=01000000001000000000, out=10011, strobe=1 
+    // // in=00000000010000010000, out=10011, strobe=1
+    // // in=00000000000000000011, out=10011, strobe=1
+    
   end
+
 
 endmodule
